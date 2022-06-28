@@ -1,0 +1,209 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://background.png" type="Texture" id=1]
+[ext_resource path="res://life.png" type="Texture" id=2]
+[ext_resource path="res://Born2bSportyV2.ttf" type="DynamicFontData" id=4]
+
+[sub_resource type="GDScript" id=7]
+script/source = "extends Node2D
+
+
+
+var startSizeX = 256
+var startSizeY = 256
+var grid = [[]] # 0 means no life and 1 means life
+var run_sim = false 
+var generation = 0
+var noise = OpenSimplexNoise.new()
+
+func create_rand_game_map():
+	for x in startSizeX:
+		for y in startSizeY:
+			var ran_value = noise.get_noise_2d(x, y)
+			if ran_value > 0:
+				grid[x].insert(y, 1)
+				$TileMap.set_cell(x,y,1)
+			elif ran_value < 0:
+				grid[x].insert(y, 0)
+				$TileMap.set_cell(x,y,0)
+				
+func create_game_premade_map(grid_map):
+	grid = grid_map
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	create_blank_grid()
+	noise.seed = randi()
+	noise.octaves = 4
+	noise.period = 20.0
+	noise.persistence = 0.8
+	var button = $MarginContainer/VBoxContainer/Button
+	var back_button = $MarginContainer/VBoxContainer2/Back_button
+	$MarginContainer/VBoxContainer2.hide()
+	back_button.connect(\"pressed\", self, \"_back_pressed\")
+	button.connect(\"pressed\", self, \"_button_pressed\")
+	
+func _back_pressed():
+	run_sim = false
+	get_tree().change_scene(\"res://main_menu.tscn\")
+	queue_free()	
+	
+func create_blank_grid():
+	for x in startSizeX:
+		grid.insert(x, [])
+		for y in startSizeY:
+			grid[x].insert(y, 0)
+			$TileMap.set_cell(x,y, 0)
+			
+			
+func _button_pressed():
+	print(\"Game started\")
+	create_rand_game_map()
+	$MarginContainer/VBoxContainer.hide()
+	$MarginContainer/VBoxContainer2.show()
+	run_sim = true
+	
+func check_neighbor(x,y): 
+	if (x > 0 and x < startSizeX) and (y > 0 and y < startSizeY):
+		return grid[x][y]
+	else: 
+		return 0
+		
+func check_state(x,y):
+	var curr = grid[x][y]
+	var life_state = 0
+	life_state += (check_neighbor(x + 1,y) + check_neighbor(x - 1,y) + check_neighbor(x,y + 1) + check_neighbor(x,y - 1) + check_neighbor(x + 1,y + 1) + check_neighbor(x - 1,y - 1) + check_neighbor(x - 1,y + 1) + check_neighbor(x + 1,y - 1))
+	if curr == 1 and life_state < 2: 
+		grid[x][y] = 0
+	elif curr == 1 and life_state >= 3:
+		grid[x][y] = 0
+	elif curr == 0 and life_state >= 3:
+		grid[x][y] = 1
+	
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func runtime():
+	$MarginContainer/VBoxContainer2/HBoxContainer/Generation.text = str(generation)
+	for x in startSizeX:
+		for y in startSizeY:
+			if grid[x][y] == 0:
+				$TileMap.set_cell(x,y, 0)
+			else:
+				$TileMap.set_cell(x,y, 1)
+				
+func _process(delta):
+	if run_sim:
+		for x in startSizeX:
+			for y in startSizeY:
+				check_state(x,y)
+		generation = generation + 1
+		runtime()
+"
+
+[sub_resource type="TileSet" id=1]
+0/name = "background.png 0"
+0/texture = ExtResource( 1 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 0, 0, 32, 32 )
+0/tile_mode = 0
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shape_offset = Vector2( 0, 0 )
+0/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+0/shape_one_way = false
+0/shape_one_way_margin = 0.0
+0/shapes = [  ]
+0/z_index = 0
+1/name = "life.png 1"
+1/texture = ExtResource( 2 )
+1/tex_offset = Vector2( 0, 0 )
+1/modulate = Color( 1, 1, 1, 1 )
+1/region = Rect2( 0, 0, 32, 32 )
+1/tile_mode = 0
+1/occluder_offset = Vector2( 0, 0 )
+1/navigation_offset = Vector2( 0, 0 )
+1/shape_offset = Vector2( 0, 0 )
+1/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+1/shape_one_way = false
+1/shape_one_way_margin = 0.0
+1/shapes = [  ]
+1/z_index = 0
+
+[sub_resource type="DynamicFont" id=2]
+size = 35
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 35
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 35
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=5]
+size = 35
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=6]
+size = 35
+font_data = ExtResource( 4 )
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Node2D" type="Node2D" parent="."]
+script = SubResource( 7 )
+
+[node name="TileMap" type="TileMap" parent="Node2D"]
+tile_set = SubResource( 1 )
+cell_size = Vector2( 32, 32 )
+format = 1
+tile_data = PoolIntArray( -65012481, 1, 0, -64946945, 1, 0, -64881409, 1, 0, -64815873, 1, 0, -64750337, 1, 0 )
+
+[node name="MarginContainer" type="MarginContainer" parent="Node2D"]
+margin_right = 202.0
+margin_bottom = 82.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Node2D/MarginContainer"]
+margin_right = 244.0
+margin_bottom = 82.0
+
+[node name="Label" type="Label" parent="Node2D/MarginContainer/VBoxContainer"]
+margin_right = 244.0
+margin_bottom = 36.0
+custom_fonts/font = SubResource( 2 )
+text = "Random Generation"
+
+[node name="Button" type="Button" parent="Node2D/MarginContainer/VBoxContainer"]
+margin_top = 40.0
+margin_right = 244.0
+margin_bottom = 82.0
+custom_fonts/font = SubResource( 3 )
+text = "Start"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="Node2D/MarginContainer"]
+margin_right = 244.0
+margin_bottom = 82.0
+
+[node name="Back_button" type="Button" parent="Node2D/MarginContainer/VBoxContainer2"]
+margin_right = 244.0
+margin_bottom = 42.0
+custom_fonts/font = SubResource( 4 )
+text = "< Back"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Node2D/MarginContainer/VBoxContainer2"]
+margin_top = 46.0
+margin_right = 244.0
+margin_bottom = 82.0
+
+[node name="Label" type="Label" parent="Node2D/MarginContainer/VBoxContainer2/HBoxContainer"]
+margin_right = 156.0
+margin_bottom = 36.0
+custom_fonts/font = SubResource( 5 )
+text = "Generation: "
+
+[node name="Generation" type="Label" parent="Node2D/MarginContainer/VBoxContainer2/HBoxContainer"]
+margin_left = 160.0
+margin_right = 175.0
+margin_bottom = 36.0
+custom_fonts/font = SubResource( 6 )
+text = "0"

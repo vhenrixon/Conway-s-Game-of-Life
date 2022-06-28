@@ -1,0 +1,174 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://main_menu.tres" type="DynamicFont" id=1]
+[ext_resource path="res://Born2bSportyV2.ttf" type="DynamicFontData" id=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends MarginContainer
+const random_game = preload(\"res://random_game.tscn\")
+const user_game = preload(\"res://game_of_life.tscn\")
+onready var selector_one = $CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer/HBoxContainer/Selector
+onready var selector_two = $CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer2/HBoxContainer/Selector
+onready var selector_three = $CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer3/HBoxContainer/Selector
+
+var current_selection = 0
+
+func _ready():
+	set_current_selection(0)
+
+func _process(delta):
+	if Input.is_action_just_pressed(\"ui_down\") and current_selection < 2:
+		current_selection += 1
+		set_current_selection(current_selection)
+	elif Input.is_action_just_pressed(\"ui_up\") and current_selection > 0:
+		current_selection -= 1
+		set_current_selection(current_selection)
+	elif Input.is_action_just_pressed(\"ui_accept\"):
+		handle_selection(current_selection)
+
+func handle_selection(_current_selection):
+	if _current_selection == 0:
+		get_parent().add_child(user_game.instance())
+		queue_free()
+	elif _current_selection == 1:
+		get_parent().add_child(random_game.instance())
+		queue_free()
+	elif _current_selection == 2:
+		get_tree().change_scene(\"res://main_menu.tscn\")
+		queue_free()
+
+func set_current_selection(_current_selection):
+	selector_one.text = \"\"
+	selector_two.text = \"\"
+	selector_three.text = \"\"
+	if _current_selection == 0:
+		selector_one.text = \">\"
+	elif _current_selection == 1:
+		selector_two.text = \">\"
+	elif _current_selection == 2:
+		selector_three.text = \">\"
+"
+
+[sub_resource type="DynamicFont" id=2]
+size = 55
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 55
+font_data = ExtResource( 2 )
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Selector_type" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = SubResource( 1 )
+
+[node name="ColorRect" type="ColorRect" parent="Selector_type"]
+margin_right = 1024.0
+margin_bottom = 600.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="CenterContainer" type="CenterContainer" parent="Selector_type"]
+margin_right = 1024.0
+margin_bottom = 600.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Selector_type/CenterContainer"]
+margin_left = 255.0
+margin_top = 167.0
+margin_right = 769.0
+margin_bottom = 433.0
+
+[node name="CenterContainer" type="CenterContainer" parent="Selector_type/CenterContainer/VBoxContainer"]
+margin_right = 514.0
+margin_bottom = 86.0
+
+[node name="Label" type="Label" parent="Selector_type/CenterContainer/VBoxContainer/CenterContainer"]
+margin_right = 514.0
+margin_bottom = 86.0
+custom_fonts/font = ExtResource( 1 )
+text = "Generation Type"
+
+[node name="MarginContainer" type="MarginContainer" parent="Selector_type/CenterContainer/VBoxContainer"]
+margin_top = 90.0
+margin_right = 514.0
+margin_bottom = 266.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer"]
+margin_right = 514.0
+margin_bottom = 176.0
+
+[node name="CenterContainer" type="CenterContainer" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer"]
+margin_right = 514.0
+margin_bottom = 56.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer"]
+margin_left = 126.0
+margin_right = 387.0
+margin_bottom = 56.0
+
+[node name="Selector" type="Label" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer/HBoxContainer"]
+margin_right = 41.0
+margin_bottom = 56.0
+rect_min_size = Vector2( 41, 0 )
+custom_fonts/font = SubResource( 2 )
+text = "> "
+
+[node name="user" type="Label" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer/HBoxContainer"]
+margin_left = 45.0
+margin_right = 261.0
+margin_bottom = 56.0
+custom_fonts/font = SubResource( 3 )
+text = "User Made"
+
+[node name="CenterContainer2" type="CenterContainer" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer"]
+margin_top = 60.0
+margin_right = 514.0
+margin_bottom = 116.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer2"]
+margin_left = 126.0
+margin_right = 387.0
+margin_bottom = 56.0
+
+[node name="Selector" type="Label" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer2/HBoxContainer"]
+margin_right = 41.0
+margin_bottom = 56.0
+rect_min_size = Vector2( 41, 0 )
+custom_fonts/font = SubResource( 2 )
+text = "> "
+
+[node name="user" type="Label" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer2/HBoxContainer"]
+margin_left = 45.0
+margin_right = 261.0
+margin_bottom = 56.0
+rect_min_size = Vector2( 216, 0 )
+custom_fonts/font = SubResource( 3 )
+text = "Random"
+
+[node name="CenterContainer3" type="CenterContainer" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer"]
+margin_top = 120.0
+margin_right = 514.0
+margin_bottom = 176.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer3"]
+margin_left = 126.0
+margin_right = 387.0
+margin_bottom = 56.0
+
+[node name="Selector" type="Label" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer3/HBoxContainer"]
+margin_right = 41.0
+margin_bottom = 56.0
+rect_min_size = Vector2( 41, 0 )
+custom_fonts/font = SubResource( 2 )
+text = "> "
+
+[node name="user" type="Label" parent="Selector_type/CenterContainer/VBoxContainer/MarginContainer/VBoxContainer/CenterContainer3/HBoxContainer"]
+margin_left = 45.0
+margin_right = 261.0
+margin_bottom = 56.0
+rect_min_size = Vector2( 216, 0 )
+custom_fonts/font = SubResource( 3 )
+text = "Back"
